@@ -166,6 +166,47 @@ System.when("/:foo")
   });
 ```
 
+### Generating Docs
+
+A System comes built with the ability to have docs generated for it. Right now, the docs are sparse
+but the interfaces are built and ready for consuming.
+
+```ts
+import { Doc } from '@beardedtim/archie'
+
+/**
+ * Somehow build up a UserSystem
+ */
+  const UserDocs = new Doc(UserSystem);
+  console.log(UserDocs.generate());
+  console.log();
+```
+
+prints something like
+
+```
+# System: User
+
+- Uses Patterns:  No
+
+
+## Actions
+
+- Action CREATE
+    - validateUserCreation
+    - createUser
+  
+
+- Action READ_ONE
+    - readUserById
+```
+
+to the console.
+
+**NOTE** If you do not name the functions you pass to `do`, they will be a blank line.
+Always make the function you pass to `do` a _named_ function (`const foo = () => { ... }`)
+if you intend on using the Documentation Generation in any serious way.
+
 ## Demo
 
 ```sh
