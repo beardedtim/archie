@@ -23,7 +23,7 @@ ${config.actions
   .map(
     (action) => `
 - Action ${action.name}
-    ${action.handlers.map((name) => `- ${name}`).join("\n")}
+${action.handlers.map((name) => `    - ${name}`).join("\n")}
   `
   )
   .join("\n")}
