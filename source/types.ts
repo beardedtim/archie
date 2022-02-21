@@ -3,14 +3,13 @@ export interface Context {
   get(key: string): any;
 }
 
-export enum Actions {
-  // The action of requesting the health of the system
-  HEALTHCHECK = "HEALTHCHECK",
-}
-
 export interface Action<T = any> {
-  type: Actions;
+  type: string;
   payload: T;
+  id: string;
+  meta: {
+    received_at: string;
+  };
 }
 
 export type ActionHandler = <T = any>(

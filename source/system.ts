@@ -1,7 +1,14 @@
-import type { Actions } from "./types";
+import { randomUUID } from "crypto";
+// import type { Actions } from "./types";
 import { ActionHandlerBuilder } from "./action-handler";
 
 export class RequestContext {
+  requestId: string;
+
+  constructor(requestId: string) {
+    this.requestId = requestId;
+  }
+
   body?: { [x: string]: any };
 
   set(key: string, data: { [x: string]: any }) {
@@ -28,8 +35,8 @@ export class SystemHandlerError extends Error {
   }
 }
 
-export class System {
-  #actionHandlers: Map<Actions, ActionHandlerBuilder[]>;
+export class System<SysytemActions> {
+  #actionHandlers: Map<SysytemActions, ActionHandlerBuilder[]>;
   #preware: ActionHandlerBuilder[];
   #postware: ActionHandlerBuilder[];
 
@@ -39,18 +46,18 @@ export class System {
     this.#postware = [];
   }
 
-  handlersFor(action: Actions) {
+  handlersFor(action: SysytemActions) {
     return this.#actionHandlers.get(action) || [];
   }
 
-  addHandler(action: Actions, handler: ActionHandlerBuilder) {
+  addHandler(action: SysytemActions, handler: ActionHandlerBuilder) {
     const handlers = this.handlersFor(action);
     this.#actionHandlers.set(action, [...handlers, handler]);
 
     return this;
   }
 
-  when(action: Actions) {
+  when(action: SysytemActions) {
     const ah = new ActionHandlerBuilder();
 
     this.addHandler(action, ah);
@@ -74,11 +81,14 @@ export class System {
     return ah;
   }
 
-  async handle(actionType: Actions, payload: { [x: string]: any }) {
-    const context = new RequestContext();
+  async handle(actionType: SysytemActions, payload: { [x: string]: any }) {
+    const id = randomUUID({ disableEntropyCache: true });
+
+    const context = new RequestContext(id);
 
     const action = {
-      type: actionType,
+      id,
+      type: actionType as unknown as string,
       payload,
       meta: {
         received_at: new Date().toISOString(),
@@ -97,6 +107,8 @@ export class System {
       for (const handler of this.#postware) {
         await handler.exec(context, action);
       }
+
+      return context;
     } catch (e) {
       throw new SystemHandlerError("Internal Handler Error", e as any);
     }

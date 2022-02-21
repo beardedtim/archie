@@ -12,6 +12,7 @@ export class ActionHandlerError extends Error {
 
 export class ActionHandlerBuilder {
   #handlers: ActionHandler[];
+
   constructor() {
     this.#handlers = [];
   }

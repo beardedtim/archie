@@ -1,13 +1,12 @@
 import test from "ava";
 import { System } from "./system";
-import { Actions } from "./types";
 
 test("Systems call handlers in order", async (assert) => {
   assert.plan(2);
 
   const system = new System();
 
-  system.when(Actions.HEALTHCHECK).do(
+  system.when("HEALTHCHECK").do(
     async (ctx, action) => {
       const oldBody = ctx.get("body");
 
@@ -30,7 +29,7 @@ test("Systems call handlers in order", async (assert) => {
     }
   );
 
-  system.handle(Actions.HEALTHCHECK, {
+  system.handle("HEALTHCHECK", {
     hello: "world",
   });
 });
@@ -40,7 +39,7 @@ test("System can handle multile calls to when", async (assert) => {
 
   const system = new System();
 
-  system.when(Actions.HEALTHCHECK).do(async (ctx) => {
+  system.when("HEALTHCHECK").do(async (ctx) => {
     const oldBody = ctx.get("body");
 
     assert.is(undefined, oldBody, "There is no old body");
@@ -48,13 +47,13 @@ test("System can handle multile calls to when", async (assert) => {
     ctx.set("body", true);
   });
 
-  system.when(Actions.HEALTHCHECK).do(async (ctx) => {
+  system.when("HEALTHCHECK").do(async (ctx) => {
     const oldbody = ctx.get("body");
 
     assert.not(undefined, oldbody, "There is an old body");
   });
 
-  await system.handle(Actions.HEALTHCHECK, {});
+  await system.handle("HEALTHCHECK", {});
 });
 
 test("Preware Runs Before Every Request", async (assert) => {
@@ -62,7 +61,7 @@ test("Preware Runs Before Every Request", async (assert) => {
 
   const system = new System();
 
-  system.when(Actions.HEALTHCHECK).do(async (ctx) => {
+  system.when("HEALTHCHECK").do(async (ctx) => {
     assert.is(1, ctx.get("body"), "Body is set");
   });
 
@@ -71,7 +70,7 @@ test("Preware Runs Before Every Request", async (assert) => {
     ctx.set("body", 1);
   });
 
-  await system.handle(Actions.HEALTHCHECK, {});
+  await system.handle("HEALTHCHECK", {});
 });
 
 test("Postware Runs After Every Request", async (assert) => {
@@ -83,10 +82,10 @@ test("Postware Runs After Every Request", async (assert) => {
     assert.is(1, ctx.get("body"), "Body is set");
   });
 
-  system.when(Actions.HEALTHCHECK).do(async (ctx) => {
+  system.when("HEALTHCHECK").do(async (ctx) => {
     assert.not(1, ctx.get("body"), "Body not set");
     ctx.set("body", 1);
   });
 
-  await system.handle(Actions.HEALTHCHECK, {});
+  await system.handle("HEALTHCHECK", {});
 });
