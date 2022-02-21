@@ -23,7 +23,7 @@ export class RequestContext {
     if (key === "body") {
       return this.body;
     } else {
-      this.#meta.get(key);
+      return this.#meta.get(key);
     }
   }
 }
