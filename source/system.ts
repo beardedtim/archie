@@ -43,6 +43,11 @@ interface SystemConfig {
    * literal.
    */
   usePattern?: boolean;
+  /**
+   * Do you want to name this specific System
+   * for Docs and Debugging purposes?
+   */
+  name?: string;
 }
 
 /**
@@ -161,5 +166,15 @@ export class System {
     } catch (e) {
       throw new SystemHandlerError("Internal Handler Error", e as any);
     }
+  }
+
+  info() {
+    return {
+      usesPatterns: Boolean(this.config.usePattern),
+      name: this.config.name ?? "Unknown System",
+      actions: [...this.#actionHandlers.keys()].map((key) => ({
+        name: key,
+      })),
+    };
   }
 }
