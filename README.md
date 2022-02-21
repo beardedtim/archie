@@ -63,6 +63,18 @@ npm i
 yarn ts-node demo/index.ts
 ```
 
+## Reasoning
+
+I wanted a way to build an _action processor_ that held some _state_
+between the pipeline processors. I also wanted to remove any concept
+of HTTP/WS/Whatever from the _unit of value_ that I think action processing
+offers. 
+
+Instead of tying the middleware processor to some HTTP library like Express,
+I am trying to build our system in a way that is _agnostic_ from the outside
+world in a _meaningful_ way. I am trying to keep the _unit of value_ as the
+modification of _context_ given some _action_ and _action handlers_. 
+
 ## Terminology
 
 ### Action
