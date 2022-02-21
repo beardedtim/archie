@@ -5,6 +5,8 @@ _some context_ being set across them.
 
 ## Usage
 
+### Basic System
+
 ```ts
 import { System } from '@beardedtim/archie'
 
@@ -61,6 +63,107 @@ await system.handle('/adam', {
         method: 'post'
     }
 }) // /adam would be triggered but /:foo would not
+```
+
+### Nested Systems
+
+```ts
+import { System, Log } from "@beardedtim/archie";
+import { randomUUID } from "crypto";
+
+const CruddySystem = new System({
+  name: "Cruddy",
+  usePattern: true,
+});
+
+const UserSystem = new System({
+  name: "Cruddy::User",
+});
+
+UserSystem.when("CREATE").do(async (ctx, action) => {
+  if (!action.payload.body) {
+    console.log(action, "action");
+    throw new Error("Missing Body for Creating of User");
+  }
+
+  ctx.set("body", {
+    id: "123-456",
+    name: action.payload.body.name,
+  });
+});
+
+CruddySystem.beforeAll().do(async (ctx, action) => {
+  const traceId = randomUUID({ disableEntropyCache: true });
+
+  ctx.set("trace-id", traceId);
+
+  Log.trace({ action, traceId }, "Handling");
+});
+
+CruddySystem.afterAll().do(async (ctx, action) => {
+  const traceId = ctx.get("trace-id");
+
+  Log.trace({ action, traceId }, "Handled");
+});
+
+CruddySystem.when("foobar").do(async (ctx, action) => {
+  Log.debug({ action }, "I am the event handler");
+
+  // Systems can call Systems
+  const result = await UserSystem.handle("CREATE", {
+    body: {
+      name: "Tim",
+    },
+  });
+
+  ctx.set("body", {
+    data: result.get("body"),
+  });
+});
+
+const main = async () => {
+  const result = await CruddySystem.handle("foobar", {
+    some: "payload",
+  });
+
+  console.log(result.get("body"), result.get("trace-id"));
+};
+
+main();
+```
+
+### Express Integration
+
+```ts
+/**
+ * You can manually handle the triggering of the system
+ * via some external event, such as an Express Request Handler
+ */
+const healthcheckRouter: RequestHandler = async (req, res, next) => {
+  const ctx = await System.handle(
+    Actions.HEALTHCHECK,
+    Plugins.Express.actionFromRequest(req).payload
+  );
+
+  res.json(ctx.get("body"));
+};
+
+/**
+ * And attach it to the external system manuall
+ */
+Server.get("/healthcheck", healthcheckRouter);
+
+/**
+ * Or you can use a plugin and just have the System
+ * generically handle the external request
+ */
+Server.use(Plugins.Express.middleware(System));
+
+System.when("/:foo")
+  .where(async (action) => action.payload.method === "get")
+  .do(async (ctx, action) => {
+    console.log("I am doing anything that starts with /:foo and is a GET request", action.meta);
+  });
 ```
 
 ## Demo
