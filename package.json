@@ -1,7 +1,7 @@
 {
   "name": "@beardedtim/archie",
-  "version": "0.1.0",
-  "description": "",
+  "version": "0.1.1",
+  "description": "A way to build _processors_ that _do things_ and result in _some context_ being set across them.",
   "main": "dist/source/index.js",
   "scripts": {
     "test": "ava",
@@ -30,5 +30,13 @@
   "dependencies": {
     "path-to-regexp": "6.2.0",
     "pino": "7.8.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beardedtim/archie.git"
+  },
+  "bugs": {
+    "url": "https://github.com/beardedtim/archie/issues"
+  },
+  "homepage": "https://github.com/beardedtim/archie#readme"
 }
