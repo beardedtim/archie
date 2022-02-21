@@ -1,5 +1,6 @@
 import type { System } from "./system";
 import type { RequestHandler, Request } from "express";
+import { maxTimeToResolve } from "./utils";
 
 const createActionFromRequest = (req: Request) => ({
   type: req.url,
@@ -12,10 +13,14 @@ const createActionFromRequest = (req: Request) => ({
   },
 });
 
+export interface ExpresConfig {
+  systemTimeout?: number;
+}
+
 export const Express = {
   actionFromRequest: createActionFromRequest,
   middleware:
-    (system: System): RequestHandler =>
+    (system: System, config: ExpresConfig = {}): RequestHandler =>
     async (req, res, next) => {
       try {
         /**
@@ -23,7 +28,13 @@ export const Express = {
          */
         const action = createActionFromRequest(req);
 
-        const ctx = await system.handle(action.type, action.payload);
+        // We give the system a max amount of time
+        // to wait for it to respond before we throw
+        // an error
+        const ctx = await maxTimeToResolve(
+          system.handle(action.type, action.payload),
+          config.systemTimeout ?? 5000
+        );
 
         res.json({ data: ctx.get("body") });
       } catch (e) {
