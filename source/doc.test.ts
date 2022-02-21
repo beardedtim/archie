@@ -8,7 +8,9 @@ test("Generates Expected Doc Page", async (assert) => {
     name: "Named System",
   });
 
-  system.when("/:foo").do();
+  const someNamedHandled = async (...args: any[]) => {};
+
+  system.when("/:foo").do(someNamedHandled);
 
   const docs = new Doc(system);
 

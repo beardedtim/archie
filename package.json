@@ -1,6 +1,6 @@
 {
   "name": "@beardedtim/archie",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A way to build _processors_ that _do things_ and result in _some context_ being set across them.",
   "main": "dist/source/index.js",
   "scripts": {

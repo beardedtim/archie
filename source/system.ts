@@ -174,6 +174,10 @@ export class System {
       name: this.config.name ?? "Unknown System",
       actions: [...this.#actionHandlers.keys()].map((key) => ({
         name: key,
+        handlers: this.handlersFor(key).reduce((a, c) => {
+          const handlers = c.handlers();
+          return a.concat(handlers);
+        }, [] as string[]),
       })),
     };
   }

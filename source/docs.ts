@@ -1,7 +1,9 @@
+import { ActionHandlerBuilder } from "@beardedtim/archie";
 import type { System } from "./system";
 
 interface ActionData {
   name: string;
+  handlers: string[];
 }
 
 interface SystemDocData {
@@ -21,7 +23,8 @@ ${config.actions
   .map(
     (action) => `
 - Action ${action.name}
-`
+    ${action.handlers.map((name) => `- ${name}`).join("\n")}
+  `
   )
   .join("\n")}
 `;

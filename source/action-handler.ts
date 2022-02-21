@@ -63,4 +63,8 @@ export class ActionHandlerBuilder {
       );
     }
   }
+
+  handlers() {
+    return this.#handlers.map(({ name }, i) => name ?? `AnonHandler:${i + 1}`);
+  }
 }
