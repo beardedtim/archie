@@ -1,9 +1,9 @@
 import type { System } from "./system";
 
-class Doc<Actions> {
-  #system: System<Actions>;
+class Doc {
+  #system: System;
 
-  constructor(system: System<Actions>) {
+  constructor(system: System) {
     this.#system = system;
   }
 
