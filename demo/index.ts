@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 import Server from "./server";
 import System, { Actions } from "./system";
-import { Plugins } from "../source";
+import { Plugins } from "@beardedtim/archie";
 
 /**
  * When some ACTION occours

@@ -1,4 +1,4 @@
-import { System } from "../source/system";
+import { System } from "@beardedtim/archie";
 
 export enum Actions {
   // The action of requesting the health of the system
