@@ -64,11 +64,16 @@ export class System {
   #preware: ActionHandlerBuilder[];
   #postware: ActionHandlerBuilder[];
 
+  #modules: Map<string, any>;
+
   config: SystemConfig;
   constructor(config = {} as SystemConfig) {
     this.#actionHandlers = new Map();
     this.#preware = [];
     this.#postware = [];
+
+    this.#modules = new Map();
+
     this.config = config;
   }
 
@@ -90,6 +95,16 @@ export class System {
     this.addHandler(action, ah);
 
     return ah;
+  }
+
+  register(moduleName: string, module: any) {
+    this.#modules.set(moduleName, module);
+
+    return this;
+  }
+
+  getModule(moduleName: string) {
+    return this.#modules.get(moduleName);
   }
 
   beforeAll() {

@@ -1,8 +1,15 @@
 import type { RequestHandler } from "express";
 import Server from "./server";
 import System, { Actions } from "./system";
-import { Plugins } from "@beardedtim/archie";
+import { Plugins } from "../source";
 
+System.register("database", {
+  query: async (str: string, args: any[]) => ({ rows: [] }),
+}).register("cache", {
+  set: async (...args: any[]) => {},
+  get: async (...args: any[]) => {},
+  has: async (...args: any[]) => {},
+});
 /**
  * When some ACTION occours
  */
@@ -90,6 +97,18 @@ System.when("/:foo")
 
 System.when("/adam").do(async (ctx, action) => {
   console.log("I am doing something specifically with /adam", action.meta);
+});
+
+System.when("/dep-inject").do(async (ctx, action) => {
+  console.log("Action: ", action);
+  const database = System.getModule("database");
+  const cache = System.getModule("cache");
+
+  console.log(
+    "I also have access to the Database and the Cache",
+    database,
+    cache
+  );
 });
 
 Server.listen(9001, () => {

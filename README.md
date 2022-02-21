@@ -10,11 +10,21 @@ import { System } from '@beardedtim/archie'
 
 const system = new System()
 
+// you can register random key/values
+// to the system itself that can be used
+// from within the action handlers
+
+system.register('database', {})
+    .register('cache', {})
+    .register('credentials', {})
+
 // Do something(s) given some event
 system.when('Some event')
     .do(
         async (ctx, action) => {
             // called 1st
+            const db = system.getModule('database')
+            const cache = system.getModule('cache')
         },
         async(ctx, action) =>  {
             // called 2nd
