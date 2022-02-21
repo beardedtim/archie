@@ -4,22 +4,26 @@ import { ActionHandlerBuilder } from "./action-handler";
 
 export class RequestContext {
   requestId: string;
-
+  #meta: Map<string, any>;
+  body?: { [x: string]: any };
   constructor(requestId: string) {
+    this.#meta = new Map();
     this.requestId = requestId;
   }
 
-  body?: { [x: string]: any };
-
-  set(key: string, data: { [x: string]: any }) {
+  set(key: string, data: any) {
     if (key === "body") {
       this.body = data;
+    } else {
+      this.#meta.set(key, data);
     }
   }
 
   get(key: string) {
     if (key === "body") {
       return this.body;
+    } else {
+      this.#meta.get(key);
     }
   }
 }
