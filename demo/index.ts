@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 import Server from "./server";
 import System, { Actions } from "./system";
+import { Plugins } from "../source";
 
 /**
  * When some ACTION occours
@@ -25,17 +26,21 @@ System.when(Actions.HEALTHCHECK)
  * before _any_ action
  */
 System.beforeAll().do(async (ctx, action) => {
-  console.debug("Request Trace: ", action);
+  console.debug("Request Trace Before: ", action);
 });
 
 /**
  * Or _after_ any action
  */
 System.afterAll().do(async (ctx, action) => {
-  console.debug("Request Trace: ", action);
-  console.debug("Request Body: ", ctx.get("body"));
+  console.debug("Request Trace After: ", action);
+  console.debug("Context Body: ", ctx.get("body"));
 });
 
+/**
+ * You can manually handle the triggering of the system
+ * via some external event, such as an Express Request Handler
+ */
 const healthcheckRouter: RequestHandler = async (req, res, next) => {
   /**
    * We ask the system to handle some action and payload
@@ -50,12 +55,10 @@ const healthcheckRouter: RequestHandler = async (req, res, next) => {
    * throw less errors _externaly_ but will lean on throwing
    * _internally_ from ActionHandlers to end the processing.
    */
-  const ctx = await System.handle(Actions.HEALTHCHECK, {
-    url: req.url,
-    params: req.params,
-    query: req.query,
-    method: req.method.toLowerCase(),
-  });
+  const ctx = await System.handle(
+    Actions.HEALTHCHECK,
+    Plugins.Express.actionFromRequest(req).payload
+  );
 
   /**
    * You can do whatever you want with the context at this point
@@ -64,7 +67,16 @@ const healthcheckRouter: RequestHandler = async (req, res, next) => {
   res.json(ctx.get("body"));
 };
 
+/**
+ * And attach it to the external system manuall
+ */
 Server.get("/healthcheck", healthcheckRouter);
+
+/**
+ * Or you can use a plugin and just have the System
+ * generically handle the external request
+ */
+Server.use(Plugins.Express.middleware(System));
 
 System.when("/:foo")
   /**
@@ -78,28 +90,6 @@ System.when("/:foo")
 
 System.when("/adam").do(async (ctx, action) => {
   console.log("I am doing something specifically with /adam", action.meta);
-});
-
-/**
- * Some Generic Express -> Action handler
- * if you are using the Pattern Matching in
- * the system
- */
-Server.use(async (req, res, next) => {
-  const action = {
-    type: req.url,
-    // TODO: Make this standard
-    payload: {
-      url: req.url,
-      params: req.params,
-      query: req.query,
-      method: req.method.toLowerCase(),
-    },
-  };
-
-  const ctx = await System.handle(action.type, action.payload);
-
-  res.json({ data: ctx.get("body") });
 });
 
 Server.listen(9001, () => {

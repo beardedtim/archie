@@ -6,7 +6,7 @@ _some context_ being set across them.
 ## Demo
 
 ```sh
-git clone <repo>
+git clone git@github.com:beardedtim/archie.git
 
 npm i
 
@@ -34,3 +34,7 @@ _doing_ something with that, including setting some shared value on Context.
 A _System_ is a grouping of Action Handlers, Preware, and Postware. It is
 responsible for taking in some request, processing it, and returning some
 output.
+
+### Plugins
+
+A way to interact with external _things_ such as Express in an _abstract_ way.
