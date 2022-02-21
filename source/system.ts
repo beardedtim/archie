@@ -6,6 +6,7 @@ export class RequestContext {
   requestId: string;
   #meta: Map<string, any>;
   body?: { [x: string]: any };
+
   constructor(requestId: string) {
     this.#meta = new Map();
     this.requestId = requestId;

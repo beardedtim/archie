@@ -3,9 +3,9 @@ export interface Context {
   get(key: string): any;
 }
 
-export interface Action<T = any> {
+export interface Action {
   type: string;
-  payload: T;
+  payload: any;
   id: string;
   meta: {
     received_at: string;
@@ -13,7 +13,4 @@ export interface Action<T = any> {
   };
 }
 
-export type ActionHandler = <T = any>(
-  ctx: Context,
-  action: Action<T>
-) => Promise<unknown>;
+export type ActionHandler = (ctx: Context, action: Action) => Promise<unknown>;
