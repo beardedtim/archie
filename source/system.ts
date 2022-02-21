@@ -36,6 +36,12 @@ export class SystemHandlerError extends Error {
 }
 
 interface SystemConfig {
+  /**
+   * If the system, when handling requests,
+   * should use path-to-regexp for matching
+   * the pattern or if it should only be
+   * literal.
+   */
   usePattern?: boolean;
 }
 

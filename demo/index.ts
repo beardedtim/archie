@@ -53,6 +53,8 @@ const healthcheckRouter: RequestHandler = async (req, res, next) => {
   const ctx = await System.handle(Actions.HEALTHCHECK, {
     url: req.url,
     params: req.params,
+    query: req.query,
+    method: req.method.toLowerCase(),
   });
 
   /**
@@ -64,21 +66,34 @@ const healthcheckRouter: RequestHandler = async (req, res, next) => {
 
 Server.get("/healthcheck", healthcheckRouter);
 
-System.when("/:foo").do(async (ctx, action) => {
-  console.log("I am doing anything that starts with /:foo", action.meta);
-});
+System.when("/:foo")
+  /**
+   * You can call runtime predicates against the
+   * action
+   */
+  .where(async (action) => action.payload.method === "get")
+  .do(async (ctx, action) => {
+    console.log("I am doing anything that starts with /:foo", action.meta);
+  });
 
 System.when("/adam").do(async (ctx, action) => {
   console.log("I am doing something specifically with /adam", action.meta);
 });
 
+/**
+ * Some Generic Express -> Action handler
+ * if you are using the Pattern Matching in
+ * the system
+ */
 Server.use(async (req, res, next) => {
   const action = {
     type: req.url,
+    // TODO: Make this standard
     payload: {
       url: req.url,
       params: req.params,
       query: req.query,
+      method: req.method.toLowerCase(),
     },
   };
 
