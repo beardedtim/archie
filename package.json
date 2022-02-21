@@ -1,5 +1,5 @@
 {
-  "name": "archie",
+  "name": "@beardedtim/archie",
   "version": "0.1.0",
   "description": "",
   "main": "dist/source/index.js",
