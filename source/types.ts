@@ -9,6 +9,7 @@ export interface Action<T = any> {
   id: string;
   meta: {
     received_at: string;
+    [x: string]: any;
   };
 }
 

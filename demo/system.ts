@@ -5,4 +5,10 @@ export enum Actions {
   HEALTHCHECK = "HEALTHCHECK",
 }
 
-export default new System<Actions>();
+export default new System({
+  /**
+   * If we want to use Express-like Path Patterns for our
+   * Action Handler Trigger
+   */
+  usePattern: true,
+});

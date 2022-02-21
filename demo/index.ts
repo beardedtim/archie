@@ -57,12 +57,35 @@ const healthcheckRouter: RequestHandler = async (req, res, next) => {
 
   /**
    * You can do whatever you want with the context at this point
-   * and the Syste, has been "successfully" cycled
+   * and the System has been "successfully" cycled
    */
   res.json(ctx.get("body"));
 };
 
 Server.get("/healthcheck", healthcheckRouter);
+
+System.when("/:foo").do(async (ctx, action) => {
+  console.log("I am doing anything that starts with /:foo", action.meta);
+});
+
+System.when("/adam").do(async (ctx, action) => {
+  console.log("I am doing something specifically with /adam", action.meta);
+});
+
+Server.use(async (req, res, next) => {
+  const action = {
+    type: req.url,
+    payload: {
+      url: req.url,
+      params: req.params,
+      query: req.query,
+    },
+  };
+
+  const ctx = await System.handle(action.type, action.payload);
+
+  res.json({ data: ctx.get("body") });
+});
 
 Server.listen(9001, () => {
   console.log("Listening");
