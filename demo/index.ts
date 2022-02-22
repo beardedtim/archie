@@ -3,6 +3,8 @@ import Server from "./server";
 import System, { Actions } from "./system";
 import { Plugins } from "../source";
 
+const always = (v: any) => () => v;
+
 System.register("database", {
   query: async (str: string, args: any[]) => ({ rows: [] }),
 }).register("cache", {
@@ -14,6 +16,10 @@ System.register("database", {
  * When some ACTION occours
  */
 System.when(Actions.HEALTHCHECK)
+  .validate(async (ctx, action) => {
+    // Any action or context before now is valid
+    return true;
+  })
   /**
    * Do some list of things
    */
@@ -86,6 +92,10 @@ Server.get("/healthcheck", healthcheckRouter);
 Server.use(Plugins.Express.middleware(System));
 
 System.when("/:foo")
+  .validate(async (ctx, action) => {
+    // we want to make sure that we _have_ a method or something
+    return action.payload && action.payload.method;
+  })
   /**
    * You can call runtime predicates against the
    * action
@@ -95,21 +105,25 @@ System.when("/:foo")
     console.log("I am doing anything that starts with /:foo", action.meta);
   });
 
-System.when("/adam").do(async (ctx, action) => {
-  console.log("I am doing something specifically with /adam", action.meta);
-});
+System.when("/adam")
+  .validate(always(Promise.resolve(true)))
+  .do(async (ctx, action) => {
+    console.log("I am doing something specifically with /adam", action.meta);
+  });
 
-System.when("/dep-inject").do(async (ctx, action) => {
-  console.log("Action: ", action);
-  const database = System.getModule("database");
-  const cache = System.getModule("cache");
+System.when("/dep-inject")
+  .validate(always(Promise.resolve(true)))
+  .do(async (ctx, action) => {
+    console.log("Action: ", action);
+    const database = System.getModule("database");
+    const cache = System.getModule("cache");
 
-  console.log(
-    "I also have access to the Database and the Cache",
-    database,
-    cache
-  );
-});
+    console.log(
+      "I also have access to the Database and the Cache",
+      database,
+      cache
+    );
+  });
 
 Server.listen(9001, () => {
   console.log("Listening");

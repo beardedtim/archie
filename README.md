@@ -22,6 +22,16 @@ system.register('database', {})
 
 // Do something(s) given some event
 system.when('Some event')
+    // return Promise<boolean> on if the
+    // ctx and ation are acceptable by
+    // the `do` handlers
+    //
+    // If you want to do this manually in your `do`
+    // block, you can set `useManualActionValidation` to true
+    // when creating your system. See demo/system.ts for more
+    .validate(async (ctx, action) => { 
+      return true
+    })
     .do(
         async (ctx, action) => {
             // called 1st
@@ -35,6 +45,7 @@ system.when('Some event')
 
 // Do somthing(s) gien some event
 system.when('Some event')
+    .validate(always(Promise.resolve(true)))
     // but only when the action matches some predicates
     .where(async (action) => action.payload.foobar === 'baz')
     .do(...)
@@ -49,8 +60,14 @@ const patternSystem = new System({
     usePattern: true
 })
 
-system.when('/:foo').where(async action => action.payload.method === 'get').do(...)
-system.when('/adam').do(...)
+system.when('/:foo')
+  .where(async action => action.payload.method === 'get')
+  .validate(always(Promise.resolve(true)))
+  .do(...)
+  
+system.when('/adam')
+  .validate(always(Promise.resolve(true)))
+  .do(...)
 
 await system.handle('/adam', {
     payload: {
@@ -74,10 +91,14 @@ import { randomUUID } from "crypto";
 const CruddySystem = new System({
   name: "Cruddy",
   usePattern: true,
+  // ignore validation for demo purposes
+  useManualActionValidation: true
 });
 
 const UserSystem = new System({
   name: "Cruddy::User",
+  // ignore validation for demo purposes
+  useManualActionValidation: true
 });
 
 UserSystem.when("CREATE").do(async (ctx, action) => {

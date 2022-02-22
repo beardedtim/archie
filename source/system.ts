@@ -53,6 +53,11 @@ interface SystemConfig {
    * for Docs and Debugging purposes?
    */
   name?: string;
+  /**
+   * Do you want the system to expect you to call validate
+   * on your action handler builders
+   */
+  useManualActionValidation?: boolean;
 }
 
 /**
@@ -95,7 +100,9 @@ export class System {
   }
 
   when(action: string) {
-    const ah = new ActionHandlerBuilder();
+    const ah = new ActionHandlerBuilder({
+      validateManually: this.config.useManualActionValidation,
+    });
 
     this.addHandler(action, ah);
 
@@ -113,7 +120,9 @@ export class System {
   }
 
   beforeAll() {
-    const ah = new ActionHandlerBuilder();
+    const ah = new ActionHandlerBuilder({
+      validateManually: true,
+    });
 
     this.#preware.push(ah);
 
@@ -121,7 +130,9 @@ export class System {
   }
 
   afterAll() {
-    const ah = new ActionHandlerBuilder();
+    const ah = new ActionHandlerBuilder({
+      validateManually: true,
+    });
 
     this.#postware.push(ah);
 

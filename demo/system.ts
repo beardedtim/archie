@@ -11,4 +11,9 @@ export default new System({
    * Action Handler Trigger
    */
   usePattern: true,
+  /**
+   * If you want to manually add validators for every `do` action,
+   * switch to true
+   */
+  useManualActionValidation: false,
 });

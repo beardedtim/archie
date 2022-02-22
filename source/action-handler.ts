@@ -10,13 +10,26 @@ export class ActionHandlerError extends Error {
   }
 }
 
+interface ActionHandlerBuilderConfig {
+  validateManually?: boolean;
+}
+
 export class ActionHandlerBuilder {
   #handlers: ActionHandler[];
   #predicates: ((action: Action) => Promise<boolean>)[];
+  #config: ActionHandlerBuilderConfig;
+  #validator?: any;
 
-  constructor() {
+  constructor(config: ActionHandlerBuilderConfig = {}) {
     this.#handlers = [];
     this.#predicates = [] as ((action: Action) => Promise<boolean>)[];
+    this.#config = config;
+  }
+
+  validate(actionHandler: ActionHandler) {
+    this.#validator = actionHandler;
+
+    return this;
   }
 
   /**
@@ -43,6 +56,17 @@ export class ActionHandlerBuilder {
    * the pipeline, in sequential order.
    */
   async exec(context: Context, action: Action) {
+    console.log(this.#validator, this.#config);
+    if (!this.#validator && !this.#config.validateManually) {
+      console.warn(
+        "You have not given this Action Handler any way to validate. This will result in undefined behavior in future verisons."
+      );
+      console.warn(
+        "If you want this behavior, add `validateManually: true` to the configration when you build your ActionHandlerBuilder"
+      );
+
+      console.debug("This code path will throw in future versions.");
+    }
     try {
       if (this.#predicates.length) {
         for (const pred of this.#predicates) {
