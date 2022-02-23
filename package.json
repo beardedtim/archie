@@ -1,6 +1,6 @@
 {
   "name": "@beardedtim/archie",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "A way to build _processors_ that _do things_ and result in _some context_ being set across them.",
   "main": "dist/source/index.js",
   "scripts": {
@@ -37,5 +37,8 @@
   "bugs": {
     "url": "https://github.com/beardedtim/archie/issues"
   },
-  "homepage": "https://github.com/beardedtim/archie#readme"
+  "homepage": "https://github.com/beardedtim/archie#readme",
+  "optionalDependencies": {
+    "jsonschema": "1.4.0"
+  }
 }

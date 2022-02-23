@@ -42,81 +42,38 @@ const pingSuccessful = await RootSystem.handle(Actions.PING, {});
 console.log(pingSuccessful.get("body")); // true
 ```
 
-### Basic System
+### Express Integration
 
 ```ts
-import { System } from '@beardedtim/archie'
+/**
+ * You can manually handle the triggering of the system
+ * via some external event, such as an Express Request Handler
+ */
+const healthcheckRouter: RequestHandler = async (req, res, next) => {
+  const ctx = await System.handle(
+    Actions.HEALTHCHECK,
+    Plugins.Express.actionFromRequest(req).payload
+  );
 
-const system = new System()
+  res.json(ctx.get("body"));
+};
 
-// you can register random key/values
-// to the system itself that can be used
-// from within the action handlers
+/**
+ * And attach it to the external system manuall
+ */
+Server.get("/healthcheck", healthcheckRouter);
 
-system.register('database', {})
-    .register('cache', {})
-    .register('credentials', {})
+/**
+ * Or you can use a plugin and just have the System
+ * generically handle the external request
+ */
+Server.use(Plugins.Express.middleware(System));
 
-// Do something(s) given some event
-system.when('Some event')
-    // return Promise<boolean> on if the
-    // ctx and ation are acceptable by
-    // the `do` handlers
-    //
-    // If you want to do this manually in your `do`
-    // block, you can set `useManualActionValidation` to true
-    // when creating your system. See demo/system.ts for more
-    .validate(async (ctx, action) => { 
-      return true
-    })
-    .do(
-        async (ctx, action) => {
-            // called 1st
-            const db = system.getModule('database')
-            const cache = system.getModule('cache')
-        },
-        async(ctx, action) =>  {
-            // called 2nd
-        }
-    )
-
-// Do somthing(s) gien some event
-system.when('Some event')
-    .validate(always(Promise.resolve(true)))
-    // but only when the action matches some predicates
-    .where(async (action) => action.payload.foobar === 'baz')
-    .do(...)
-
-const resultCTX = await system.handle('Some event', {
-    payload: {
-        foobar: 'baz'
-    }
-})
-
-const patternSystem = new System({
-    usePattern: true
-})
-
-system.when('/:foo')
-  .where(async action => action.payload.method === 'get')
-  .validate(always(Promise.resolve(true)))
-  .do(...)
-  
-system.when('/adam')
-  .validate(always(Promise.resolve(true)))
-  .do(...)
-
-await system.handle('/adam', {
-    payload: {
-        method: 'get'
-    }
-}) // /adam would be triggered and /:foo would have { payload: { params: { foo: adam } } }
-
-await system.handle('/adam', {
-    payload: {
-        method: 'post'
-    }
-}) // /adam would be triggered but /:foo would not
+System.when("/:foo")
+  .where(async (action) => action.payload.method === "get")
+  .do(async (ctx, action) => {
+    console.log("I am doing anything that starts with /:foo and is a GET request", action.meta);
+  });
 ```
 
 ### Nested Systems
@@ -190,37 +147,41 @@ const main = async () => {
 main();
 ```
 
-### Express Integration
+### Helpers
+
+#### validateByJSONSchema
+
+This allows you to say that the `action.payload` value will
+match a specific JSON Schema
 
 ```ts
-/**
- * You can manually handle the triggering of the system
- * via some external event, such as an Express Request Handler
- */
-const healthcheckRouter: RequestHandler = async (req, res, next) => {
-  const ctx = await System.handle(
-    Actions.HEALTHCHECK,
-    Plugins.Express.actionFromRequest(req).payload
-  );
-
-  res.json(ctx.get("body"));
+const healthcheckSchema = {
+  type: "object",
+  required: ["hello"],
+  properties: {
+    hello: {
+      type: "string",
+    },
+  },
 };
 
 /**
- * And attach it to the external system manuall
+ * When some ACTION occours
  */
-Server.get("/healthcheck", healthcheckRouter);
-
-/**
- * Or you can use a plugin and just have the System
- * generically handle the external request
- */
-Server.use(Plugins.Express.middleware(System));
-
-System.when("/:foo")
-  .where(async (action) => action.payload.method === "get")
+System.when(Actions.HEALTHCHECK)
+  .validate(Helpers.validateByJSONScema(healthcheckSchema))
+  /**
+   * Do some list of things
+   */
   .do(async (ctx, action) => {
-    console.log("I am doing anything that starts with /:foo and is a GET request", action.meta);
+    console.log("System handling HEALTHCHECK action", action);
+    console.log("Maybe we go out and check Database connections, or whatever");
+
+    ctx.set("body", {
+      data: {
+        healthy: true,
+      },
+    });
   });
 ```
 

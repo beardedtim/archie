@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 import Server from "./server";
 import System, { Actions } from "./system";
-import { Plugins } from "../source";
+import { Plugins, Helpers } from "../source";
 
 const always = (v: any) => () => v;
 
@@ -12,14 +12,22 @@ System.register("database", {
   get: async (...args: any[]) => {},
   has: async (...args: any[]) => {},
 });
+
+const healthcheckSchema = {
+  type: "object",
+  required: ["hello"],
+  properties: {
+    hello: {
+      type: "string",
+    },
+  },
+};
+
 /**
  * When some ACTION occours
  */
 System.when(Actions.HEALTHCHECK)
-  .validate(async (ctx, action) => {
-    // Any action or context before now is valid
-    return false;
-  })
+  .validate(Helpers.validateByJSONScema(healthcheckSchema))
   /**
    * Do some list of things
    */
@@ -68,10 +76,9 @@ const healthcheckRouter: RequestHandler = async (req, res, next) => {
    * throw less errors _externaly_ but will lean on throwing
    * _internally_ from ActionHandlers to end the processing.
    */
-  const ctx = await System.handle(
-    Actions.HEALTHCHECK,
-    Plugins.Express.actionFromRequest(req).payload
-  );
+  const ctx = await System.handle(Actions.HEALTHCHECK, {
+    hello: "world",
+  });
 
   /**
    * You can do whatever you want with the context at this point
