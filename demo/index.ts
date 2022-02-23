@@ -18,7 +18,7 @@ System.register("database", {
 System.when(Actions.HEALTHCHECK)
   .validate(async (ctx, action) => {
     // Any action or context before now is valid
-    return true;
+    return false;
   })
   /**
    * Do some list of things

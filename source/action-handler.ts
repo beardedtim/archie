@@ -56,7 +56,6 @@ export class ActionHandlerBuilder {
    * the pipeline, in sequential order.
    */
   async exec(context: Context, action: Action) {
-    console.log(this.#validator, this.#config);
     if (!this.#validator && !this.#config.validateManually) {
       console.warn(
         "You have not given this Action Handler any way to validate. This will result in undefined behavior in future verisons."
@@ -66,25 +65,25 @@ export class ActionHandlerBuilder {
       );
 
       console.debug("This code path will throw in future versions.");
+    } else if (this.#validator) {
+      if (!(await this.#validator(context, action))) {
+        throw new TypeError(
+          `Context and Action failed for this action handler. See logs for more details`
+        );
+      }
     }
-    try {
-      if (this.#predicates.length) {
-        for (const pred of this.#predicates) {
-          const passed = await pred(action);
-          if (!passed) {
-            return;
-          }
+
+    if (this.#predicates.length) {
+      for (const pred of this.#predicates) {
+        const passed = await pred(action);
+        if (!passed) {
+          return;
         }
       }
+    }
 
-      for (const handler of this.#handlers) {
-        await handler(context, action);
-      }
-    } catch (e) {
-      throw new ActionHandlerError(
-        "Some Handler threw when processing",
-        e as any
-      );
+    for (const handler of this.#handlers) {
+      await handler(context, action);
     }
   }
 
