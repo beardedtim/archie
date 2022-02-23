@@ -5,6 +5,9 @@ _some context_ being set across them.
 
 ## Usage
 
+> You can find full-fledged examples inside of `/examples`
+> if you want to see how this might look in real-life
+
 ### PING -> PONG
 
 Here is an example of a system sending messages to itself in order
