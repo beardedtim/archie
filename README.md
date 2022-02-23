@@ -5,6 +5,40 @@ _some context_ being set across them.
 
 ## Usage
 
+### PING -> PONG
+
+Here is an example of a system sending messages to itself in order
+to respond to a specific question. This proves that each invocation
+is a new closure/ran each time and that the systems can be nested.
+
+```ts
+enum Actions {
+  PING = "PING",
+  PONG = "PONG",
+}
+
+RootSystem.when(Actions.PING)
+  .validate(always(Promise.resolve(true)))
+  .do(async (ctx, action) => {
+    const pingSymbol = Symbol("New Ping");
+    const result = await RootSystem.handle(Actions.PONG, {
+      id: pingSymbol,
+    });
+
+    ctx.set("body", result.get("body") === pingSymbol);
+  });
+
+RootSystem.when(Actions.PONG)
+  .validate(always(Promise.resolve(true)))
+  .do(async (ctx, action) => {
+    ctx.set("body", action.payload.id);
+  });
+
+const pingSuccessful = await RootSystem.handle(Actions.PING, {});
+
+console.log(pingSuccessful.get("body")); // true
+```
+
 ### Basic System
 
 ```ts
